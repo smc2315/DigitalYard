@@ -2,7 +2,7 @@
 
 ### Prerequisites
 
-semantic segmentation 모델 다운로드
+학습된 semantic segmentation 모델 다운로드
 
 https://drive.google.com/file/d/1ALL7M4HhXtudpXTEz28IknEMv-CCn_rq/view?usp=sharing
 
