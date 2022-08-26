@@ -4,9 +4,8 @@
 
 semantic segmentation 모델 다운로드
 
-```
 https://drive.google.com/file/d/1ALL7M4HhXtudpXTEz28IknEMv-CCn_rq/view?usp=sharing
-```
+
 다운로드 된 파일을 DigitalYard 폴더에 추가(ImageViewer.py와 같은 경로)
 
 
