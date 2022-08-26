@@ -129,7 +129,7 @@ class MyLabel(QLabel):
         y1 = self.point1[1]
         x2 = self.point2[0]
         y2 = self.point2[1]
-        return int((abs(x2 - x1) ** 2 + abs(y2 - y1) ** 2) ** 0.5 * 0.0647*2)
+        return int((abs(x2 - x1) ** 2 + abs(y2 - y1) ** 2) ** 0.5 * 0.0647*4)
 
     #사각형 영역 넓이 계산
     def calArea(self):
@@ -149,7 +149,7 @@ class MyLabel(QLabel):
 
         imageViewer.mousePosLabel.setText(
             'Point 1:\nHeight(y): %d\n Width(x):  %d\n\nPoint 2:\nHeight(y): %d\n Width(x):  %d\n\nArea = %f M\u00b2' % (
-            y1, x1, y2, x2, abs(x2 - x1) * abs(y2 - y1) * 0.0647 * 0.0647*4))
+            y1, x1, y2, x2, abs(x2 - x1) * abs(y2 - y1) * 0.0647 * 0.0647*16))
 
 #main window
 class QImageViewer(QMainWindow):
