@@ -24,6 +24,14 @@ mim install mmcv-full==1.5.3
 python ImageViewer.py
 
 ```
+ImageViewer 기능
+- 이미지 담긴 폴더 선택하여 맵 생성(ctrl+o)
+- 맵 확대 및 축소(ctrl++, ctrl+-)
+- 맵 창크기에 맞춤
+- 맵 원본 크기로 보기
+- 맵 위에 각 레이어(블럭, 도로, 건물) 표시
+- 맵 저장
+
 ## Built With
 
 * [mmsegmentation](https://github.com/open-mmlab/mmsegmentation) - open source semantic segmentation toolbox based on PyTorch
