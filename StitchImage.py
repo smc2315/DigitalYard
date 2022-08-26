@@ -145,28 +145,34 @@ import cv2
 import numpy as np
 from getLabel import getLabel
 
-#이미지와 라벨들을 절반으로 축소 후 이미지의 gps 좌표값을 기준으로 mapping
+#이미지와 라벨들을 1/4로 축소 후 이미지의 gps 좌표값을 기준으로 mapping
 def stitchImage(path):
     file_list1 = os.listdir(path)
     file_list1.sort()
-    background = np.zeros((15000,30000,3),dtype = 'u1')
-    background2 = np.zeros((15000,30000),dtype = 'u1')
+    # background = np.zeros((15000,30000,3),dtype = 'u1')
+    # background2 = np.zeros((15000,30000),dtype = 'u1')
+    background = np.zeros((7500, 15000, 3), dtype='u1')
+    background2 = np.zeros((7500,15000), dtype='u1')
 
     for img in file_list1:
         imgPath = path + '/' + img
         lon, lat = getGPS(imgPath)
         img = cv2.imread(imgPath)
-        img = cv2.resize(img, (2028, 1520))
+        # img = cv2.resize(img, (2028, 1520))
+        img = cv2.resize(img, (1014, 760))
         img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
         label = getLabel(imgPath)[0].astype(np.dtype('uint8'))
-        label = cv2.resize(label,(2028,1520))
+        # label = cv2.resize(label,(2028,1520))
+        label = cv2.resize(label, (1014, 760))
         label = cv2.rotate(label, cv2.ROTATE_90_CLOCKWISE)
-        h=2028
-        w= 1520
+        h=2028/2
+        w= 1520/2
         gps = calcScreenCoordinates(lat, lon)
         x = gps['x']
         y = gps['y']+100
         x = x-(y-5200)*220/870*0.9
+        x=x/2
+        y=y/2
         background[int(y*0.575-h/2):int(y*0.575+h/2), int(x-w/2):int(x+w/2)] = img
         background2[int(y*0.575-h/2):int(y*0.575+h/2), int(x-w/2):int(x+w/2)] = label
     return background, background2
