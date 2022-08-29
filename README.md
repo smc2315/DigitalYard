@@ -10,7 +10,7 @@ https://drive.google.com/file/d/1ALL7M4HhXtudpXTEz28IknEMv-CCn_rq/view?usp=shari
 
 
 ### Installing
-
+파이썬 3.9 권장
 ```
 pip install -r requirements.txt
 pip install torch==1.11.0 torchvision --extra-index-url https://download.pytorch.org/whl/cu113
