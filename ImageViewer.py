@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMain
 from getLabel import getLayer, getLayeredImg
 from StitchImage import stitchImage
 from ProgressBar import ProgressBar
+from MoveImage import move_image
 
 
 
@@ -43,15 +44,21 @@ class MyLabel(QLabel):
         self.position = []
 
     def mousePressEvent(self, event):
+        imageViewer.moveFlag = False
         modifiers = QApplication.keyboardModifiers()
         #shift + 드레그로 사각형 영역 넓이
-        if modifiers == Qt.ShiftModifier:
+        if modifiers == Qt.ShiftModifier or modifiers == Qt.ControlModifier:
             self.position = []
             imageViewer.pointFlag1=False
             self.first = event.pos()
             self.begin = event.pos()
             self.end = event.pos()
             self.update()
+        # elif modifiers == Qt.ControlModifier:
+        #     print("ok")
+        #     imageViewer.image = move_image(imageViewer.image)
+        #     imageViewer.showImage()
+
         #두 포인트 클릭으로 거리계산
         else:
 
@@ -59,8 +66,9 @@ class MyLabel(QLabel):
                 w = imageViewer.imageLabel.size().width()
                 h = imageViewer.imageLabel.size().height()
 
-                x = event.pos().x() / w * 30000
-                y = event.pos().y() / h * 15000
+                x = event.pos().x() / w * imageViewer.image.shape[1]
+                print(imageViewer.image.shape[1],imageViewer.image.shape[0])
+                y = event.pos().y() / h * imageViewer.image.shape[0]
             else:
                 x = event.pos().x() / imageViewer.scaleFactor
                 y = event.pos().y() / imageViewer.scaleFactor
@@ -85,7 +93,7 @@ class MyLabel(QLabel):
 
     def mouseMoveEvent(self, event):
         modifiers = QApplication.keyboardModifiers()
-        if modifiers == Qt.ShiftModifier:
+        if modifiers == Qt.ShiftModifier or modifiers == Qt.ControlModifier:
             self.end = event.pos()
             self.update()
         else:
@@ -99,9 +107,25 @@ class MyLabel(QLabel):
             self.end = event.pos()
             self.update()
             self.calArea()
+        elif modifiers == Qt.ControlModifier:
+            self.end = event.pos()
+            self.update()
+            imageViewer.moveFlag = True
+            if imageViewer.fitToWindowAct.isChecked():
+                w = imageViewer.imageLabel.size().width()
+                h = imageViewer.imageLabel.size().height()
+
+                imageViewer.x1 = int(self.first.x() / w * imageViewer.image.shape[1])
+                imageViewer.y1 = int(self.first.y() / h * imageViewer.image.shape[0])
+                imageViewer.x2 = int(self.end.x() / w * imageViewer.image.shape[1])
+                imageViewer.y2 = int(self.end.y() / h * imageViewer.image.shape[0])
+            else:
+                imageViewer.x1 = int(self.first.x() / imageViewer.scaleFactor)
+                imageViewer.y1 = int(self.first.y() / imageViewer.scaleFactor)
+                imageViewer.x2 = int(self.end.x() / imageViewer.scaleFactor)
+                imageViewer.y2 = int(self.end.y() / imageViewer.scaleFactor)
         else:
             pass
-
     #
     def paintEvent(self, event):
         super().paintEvent(event)
@@ -113,6 +137,11 @@ class MyLabel(QLabel):
             qp.setBrush(br)
             qp.drawRect(QRect(self.begin, self.end))
         #두 포인트 클릭 빨간 점과 두 포인트간 직선 생성
+        elif modifiers == Qt.ControlModifier:
+            qp = QPainter(self)
+            br = QBrush(QColor(139, 0, 255, 40))
+            qp.setBrush(br)
+            qp.drawRect(QRect(self.begin, self.end))
         else:
             qp = QPainter(self)
             qp.setPen(QPen(Qt.red, 8))
@@ -137,10 +166,10 @@ class MyLabel(QLabel):
             w = imageViewer.imageLabel.size().width()
             h = imageViewer.imageLabel.size().height()
 
-            x1 = self.first.x() / w * 30000
-            y1 = self.first.y() / h * 15000
-            x2 = self.end.x() / w * 30000
-            y2 = self.end.y() / h * 15000
+            x1 = self.first.x() / w * imageViewer.image.shape[1]
+            y1 = self.first.y() / h * imageViewer.image.shape[0]
+            x2 = self.end.x() / w * imageViewer.image.shape[1]
+            y2 = self.end.y() / h * imageViewer.image.shape[0]
         else:
             x1 = self.first.x() / imageViewer.scaleFactor
             y1 = self.first.y() / imageViewer.scaleFactor
@@ -150,6 +179,12 @@ class MyLabel(QLabel):
         imageViewer.mousePosLabel.setText(
             'Point 1:\nHeight(y): %d\n Width(x):  %d\n\nPoint 2:\nHeight(y): %d\n Width(x):  %d\n\nArea = %f M\u00b2' % (
             y1, x1, y2, x2, abs(x2 - x1) * abs(y2 - y1) * 0.0647 * 0.0647*16))
+
+
+
+
+
+
 
 #main window
 class QImageViewer(QMainWindow):
@@ -194,10 +229,20 @@ class QImageViewer(QMainWindow):
         self.setWindowTitle("Image Viewer")
         self.showMaximized()
 
+        self.x1 =0
+        self.y1 = 0
+        self.x2 = 0
+        self.y2 = 0
+
+        self.moveFlag = False
+
+
+
     #맵 이미지 표출 및 이미지 있을시에 가능한 도구들 활성화
     def showImage(self):
         self.Qimage = QImage(self.image.data, self.image.shape[1], self.image.shape[0],
                              QImage.Format_RGB888).rgbSwapped()
+
         self.imageLabel.setPixmap(QPixmap.fromImage(self.Qimage))
 
 
@@ -218,6 +263,10 @@ class QImageViewer(QMainWindow):
             self.scaleImage(0.1)
 
     #이미지 폴더 선택 및 맵 제작
+    def reShowImage(self):
+        self.Qimage = QImage(self.image.data, self.image.shape[1], self.image.shape[0],
+                             QImage.Format_RGB888).rgbSwapped()
+        self.imageLabel.setPixmap(QPixmap.fromImage(self.Qimage))
     def open(self):
         #폴더 선택
         self.folderPath = QFileDialog.getExistingDirectory()
@@ -241,7 +290,50 @@ class QImageViewer(QMainWindow):
                 return
 
             self.image = self.img
+
             self.showImage()
+
+    def keyPressEvent(self, event):
+        if self.moveFlag  and not self.layer1Act.isChecked() and not self.layer2Act.isChecked() and not self.layer3Act.isChecked():
+            if event.key() == Qt.Key_D:
+                if self.x2+10<self.image.shape[1]:
+                    move_image(self,0)
+                    self.x1=self.x1+10
+                    self.x2=self.x2+10
+
+                    tmp = self.scaleFactor
+                    self.reShowImage()
+                    self.scaleFactor = tmp
+
+            elif event.key() == Qt.Key_A:
+                if self.x1-10>0:
+                    move_image(self,1)
+                    self.x1=self.x1-10
+                    self.x2=self.x2-10
+
+                    tmp = self.scaleFactor
+                    self.reShowImage()
+                    self.scaleFactor = tmp
+            elif event.key() == Qt.Key_S:
+                if self.y2+10<self.image.shape[0]:
+                    move_image(self,2)
+                    self.y1=self.y1+10
+                    self.y2=self.y2+10
+
+                    tmp = self.scaleFactor
+                    self.reShowImage()
+                    self.scaleFactor = tmp
+
+            elif event.key() == Qt.Key_W:
+                if self.y1-10>0:
+                    move_image(self,3)
+                    self.y1=self.y1-10
+                    self.y2=self.y2-10
+
+                    tmp = self.scaleFactor
+                    self.reShowImage()
+                    self.scaleFactor = tmp
+
 
     #병합된 원본 이미지 저장
     def save(self):
@@ -275,14 +367,14 @@ class QImageViewer(QMainWindow):
         layer3 = self.layer3Act.isChecked()
         if layer1:
             self.image = getLayeredImg(self.image, self.layerBlock)
-            self.showImage()
+            self.reShowImage()
         if not layer1:
             self.image = self.img
             if layer2:
                 self.image = getLayeredImg(self.image, self.layerRoad)
             if layer3:
                 self.image = getLayeredImg(self.image, self.layerStruct)
-            self.showImage()
+            self.reShowImage()
 
     def Layer2(self):
         layer1 = self.layer1Act.isChecked()
@@ -290,14 +382,14 @@ class QImageViewer(QMainWindow):
         layer3 = self.layer3Act.isChecked()
         if layer2:
             self.image = getLayeredImg(self.image, self.layerRoad)
-            self.showImage()
+            self.reShowImage()
         if not layer2:
             self.image = self.img
             if layer1:
                 self.image = getLayeredImg(self.image, self.layerBlock)
             if layer3:
                 self.image = getLayeredImg(self.image, self.layerStruct)
-            self.showImage()
+            self.reShowImage()
 
     def Layer3(self):
         layer1 = self.layer1Act.isChecked()
@@ -305,14 +397,14 @@ class QImageViewer(QMainWindow):
         layer3 = self.layer3Act.isChecked()
         if layer3:
             self.image = getLayeredImg(self.image, self.layerStruct)
-            self.showImage()
+            self.reShowImage()
         if not layer3:
             self.image = self.img
             if layer2:
                 self.image = getLayeredImg(self.image, self.layerRoad)
             if layer1:
                 self.image = getLayeredImg(self.image, self.layerBlock)
-            self.showImage()
+            self.reShowImage()
 
 
     def about(self):

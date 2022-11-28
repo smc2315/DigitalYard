@@ -60,5 +60,5 @@ If you find the log file not been created, you might check if `mmcv.utils.get_lo
 In the test script, we provide `show-dir` argument to control whether output the painted images. Users might run the following command:
 
 ```shell
-python tools/test.py {config} {checkpoint} --show-dir {/path/to/save/image} --opacity 1
+python tools/MoveImage.py {config} {checkpoint} --show-dir {/path/to/save/image} --opacity 1
 ```

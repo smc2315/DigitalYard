@@ -1,6 +1,7 @@
 
 # gps 좌표를 x,y 좌표로 변환
 import math
+#data = [{'x':0,'y':0,'lat':128.673729, 'lon':34.879354},{'x':6815/2,'y':0,'lat':128.693538, 'lon':34.873877},{'x':0,'y':int(7555/2),'lat':128.690564, 'lon':34.866509}]
 data = [{'x':0,'y':0,'lat':128.690494, 'lon':34.870724},{'x':6815/2,'y':0,'lat':128.693538, 'lon':34.873877},{'x':0,'y':int(7555/2),'lat':128.690564, 'lon':34.866509}]
 
 targetLon = 34.87
@@ -29,7 +30,7 @@ def convertUnitToLon(LatValue):
     return LatValue * distancePerLat / distancePerLon
 
 theta = calcTheta(convertUnitToLat(data[0]['lon']), data[0]['lat'], convertUnitToLat(data[1]['lon']), data[1]['lat'], True) * -1
-theta = theta-0.005
+theta = theta-0.01
 
 
 def calcCoordinatesAfterRotation(origin_x, origin_y, x, y, theta, is_rad):
@@ -140,19 +141,70 @@ def getGPS(path):
 
 
 
+import math
+from math import pi
+def LatLontoXY(lat_center,lon_center):
+    C =(256/(2*pi) )
+
+    x=C*(math.radians(lon_center)+pi)
+    y=C*(pi-math.log(math.tan((pi/4) + math.radians(lat_center)/2)))
+    degree=54
+    newX = x*math.cos(degree/180*pi) - y*math.sin(degree/180*pi)
+    newY = x*math.sin(degree/180*pi) + y*math.cos(degree/180*pi)
+    x = (newX - 46.89980042107082) * 100 * 4927.78
+    y = (newY - 237.2438511323537) * 100 * 4927.77
+
+    return x,y
+
 import os
 import cv2
 import numpy as np
 from getLabel import getLabel
 
-#이미지와 라벨들을 1/4로 축소 후 이미지의 gps 좌표값을 기준으로 mapping
+def setBackground(path,file_list):
+    minX = 100000
+    minY = 100000
+    maxX = 0
+    maxY = 0
+    plusX = 0
+    plusY = 0
+    for img in file_list:
+        imgPath = path + '/' + img
+        lon,lat = getGPS(imgPath)
+        gps = calcScreenCoordinates(lat,lon)
+        x = gps['x']
+        y = gps['y']
+
+        if minX > x:
+            minX = x
+        if minY > y:
+            minY = y
+        if maxX < x:
+            maxX = x
+        if maxY < y:
+            maxY = y
+
+    plusX = plusX-minX+10000
+
+    plusY = plusY - minY+10000
+    return int((maxX+50000-minX)/4), int((maxY+20000 - minY)/4),int(plusX/4),int(plusY/4)
+
+#이미지와 라벨들을 1/4 로 축소 후 이미지의 gps 좌표값을 기준으로 mapping
 def stitchImage(path):
     file_list1 = os.listdir(path)
     file_list1.sort()
+    lenX,lenY,plusX,plusY = setBackground(path,file_list1)
+    lenY = lenY+1000-lenY%1000
+    lenX = lenX+1000-lenX%1000
+
+
     # background = np.zeros((15000,30000,3),dtype = 'u1')
     # background2 = np.zeros((15000,30000),dtype = 'u1')
-    background = np.zeros((7500, 15000, 3), dtype='u1')
-    background2 = np.zeros((7500,15000), dtype='u1')
+    # background = np.zeros((8000, 15000, 3), dtype='u1')
+    # background2 = np.zeros((8000,15000), dtype='u1')
+
+    background = np.zeros((lenY, lenX, 3), dtype='u1')
+    background2 = np.zeros((lenY,lenX), dtype='u1')
 
     for img in file_list1:
         imgPath = path + '/' + img
@@ -169,10 +221,47 @@ def stitchImage(path):
         w= 1520/2
         gps = calcScreenCoordinates(lat, lon)
         x = gps['x']
-        y = gps['y']+100
+        y = gps['y'] + 100
+
         x = x-(y-5200)*220/870*0.9
+        y = y*1.1-x*0.05
         x=x/2
-        y=y/2
+        y=y/2+500
+        x = x+plusX
+        y = y*0.575+plusY
+        # background[int(y * 0.575 - h / 2):int(y * 0.575 + h / 2), int(x - w / 2):int(x + w / 2)] = img
+        # background2[int(y * 0.575 - h / 2):int(y * 0.575 + h / 2), int(x - w / 2):int(x + w / 2)] = label
+        background[int(y  - h / 2):int(y  + h / 2), int(x - w / 2):int(x + w / 2)] = img
+        background2[int(y  - h / 2):int(y  + h / 2), int(x - w / 2):int(x + w / 2)] = label
+    return background, background2
+
+def stitchImage1(path):
+    file_list1 = os.listdir(path)
+    file_list1.sort()
+    # background = np.zeros((15000,30000,3),dtype = 'u1')
+    # background2 = np.zeros((15000,30000),dtype = 'u1')
+    background = np.zeros((15000, 30000, 3), dtype='u1')
+    background2 = np.zeros((15000,30000), dtype='u1')
+
+    for img in file_list1:
+        imgPath = path + '/' + img
+        lon, lat = getGPS(imgPath)
+        print(lat,lon)
+        img = cv2.imread(imgPath)
+        # img = cv2.resize(img, (2028, 1520))
+        img = cv2.resize(img, (1014, 760))
+        img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+        label = getLabel(imgPath)[0].astype(np.dtype('uint8'))
+        # label = cv2.resize(label,(2028,1520))
+        label = cv2.resize(label, (1014, 760))
+        label = cv2.rotate(label, cv2.ROTATE_90_CLOCKWISE)
+        h=2028/2
+        w= 1520/2
+        x,y= LatLontoXY(lon,lat)
+        print(x,y)
+
         background[int(y*0.575-h/2):int(y*0.575+h/2), int(x-w/2):int(x+w/2)] = img
         background2[int(y*0.575-h/2):int(y*0.575+h/2), int(x-w/2):int(x+w/2)] = label
     return background, background2
+
+
