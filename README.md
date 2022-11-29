@@ -34,6 +34,24 @@ ImageViewer 기능
 - shift+마우스 클릭 후 드래그로 사각형 내의 넓이 계산
 - 맵 저장
 
+## Training
+https://colab.research.google.com/drive/1VSZF6bSqQn5yGjv3HJEImHuv39n6GQlI?usp=share_link
+ipynb 파일 다운로드(colab으로 실행 권장)
+colab : https://colab.research.google.com/?hl=ko
+ipynb 파일 열어서 구글드라이브와 마운트
+/content/drive/MyDrive 에 학습된 모델 업로드(Prerequisites에서 다운 받은 모델)
+추가 학습할 데이터셋 /content/drive/MyDrive/Data 에 업로드
+/content/drive/MyDrive/Data/images에 모든 학습 이미지 
+/content/drive/MyDrive/Data/labels에 모든 학습 라벨
+/content/drive/MyDrive/Data/splits에 train과 validation 나누는 기준 txt파일(train.txt, val.txt)
+
+모든 셀 실행
+
+```
+
+
+```
+
 ## Built With
 
 * [mmsegmentation](https://github.com/open-mmlab/mmsegmentation) - open source semantic segmentation toolbox based on PyTorch
