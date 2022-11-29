@@ -60,5 +60,5 @@
 在测试脚本中，我们提供了`show-dir`参数来控制是否输出绘制的图像。用户可以运行以下命令:
 
 ```shell
-python tools/test.py {config} {checkpoint} --show-dir {/path/to/save/image} --opacity 1
+python tools/MoveImage.py {config} {checkpoint} --show-dir {/path/to/save/image} --opacity 1
 ```
