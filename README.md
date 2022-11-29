@@ -61,7 +61,7 @@ ipynb 파일 열어서 구글드라이브와 마운트
 /content/drive/MyDrive 에 학습된 모델 업로드(Prerequisites에서 다운 받은 모델)
 추가 학습할 데이터셋 /content/drive/MyDrive/Data 에 업로드
 /content/drive/MyDrive/Data/images에 모든 학습 이미지 업로드
-/content/drive/MyDrive/Data/labels에 모든 학습 라벨 업로드
+/content/drive/MyDrive/Data/labels에 모든 학습 라벨 업로드(라벨 파일의 이름을 이미지 파일의 이름과 같게 수정;맨뒤 labelIds )
 /content/drive/MyDrive/Data/splits에 train과 validation 나누는 기준 txt파일(train.txt, val.txt, 보통 8:2로 나눔)
 
 train과 validation은 랜덤 선택하여 8:2로 나눠야 함
