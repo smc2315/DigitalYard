@@ -36,9 +36,13 @@ ImageViewer 기능
 
 ## Training
 https://colab.research.google.com/drive/1VSZF6bSqQn5yGjv3HJEImHuv39n6GQlI?usp=share_link
+
 ipynb 파일 다운로드(colab으로 실행 권장)
+
 colab : https://colab.research.google.com/?hl=ko
+
 ipynb 파일 열어서 구글드라이브와 마운트
+
 /content/drive/MyDrive 에 학습된 모델 업로드(Prerequisites에서 다운 받은 모델)
 추가 학습할 데이터셋 /content/drive/MyDrive/Data 에 업로드
 /content/drive/MyDrive/Data/images에 모든 학습 이미지 
