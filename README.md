@@ -34,6 +34,21 @@ ImageViewer 기능
 - shift+마우스 클릭 후 드래그로 사각형 내의 넓이 계산
 - 맵 저장
 
+## DataSet
+데이터셋 제작툴 : cvat
+
+cvat 웹페이지로 사용 가능하나 서버가 자주 다운되는 관계로 docker로 local에서 실행 권장
+
+cvat docker 사용법: https://smart-factory-lee-joon-ho.tistory.com/203
+
+cvat에서 라벨링할 이미지셋을 업로드 후 polygon 형식으로 annotation 작업 진행
+
+annotation 예시: ![image](https://user-images.githubusercontent.com/74086927/204449809-7b6cae9f-8d42-4566-a21c-f4b6346366bf.png)
+
+annotation 작업 후 cityscapes 형식으로 데이터셋 내보내기
+
+다운된 zip 파일 압축 후 /gtFine/default에 있는 라벨들 중 labelIds 파일들 제외하고 다 삭제
+
 ## Training
 https://colab.research.google.com/drive/1VSZF6bSqQn5yGjv3HJEImHuv39n6GQlI?usp=share_link
 
@@ -45,9 +60,12 @@ ipynb 파일 열어서 구글드라이브와 마운트
 
 /content/drive/MyDrive 에 학습된 모델 업로드(Prerequisites에서 다운 받은 모델)
 추가 학습할 데이터셋 /content/drive/MyDrive/Data 에 업로드
-/content/drive/MyDrive/Data/images에 모든 학습 이미지 
-/content/drive/MyDrive/Data/labels에 모든 학습 라벨
-/content/drive/MyDrive/Data/splits에 train과 validation 나누는 기준 txt파일(train.txt, val.txt)
+/content/drive/MyDrive/Data/images에 모든 학습 이미지 업로드
+/content/drive/MyDrive/Data/labels에 모든 학습 라벨 업로드
+/content/drive/MyDrive/Data/splits에 train과 validation 나누는 기준 txt파일(train.txt, val.txt, 보통 8:2로 나눔)
+
+train과 validation은 랜덤 선택하여 8:2로 나눠야 함
+train.txt 예시: [train.txt](https://github.com/smc2315/DigitalYard/files/10110165/train.txt)
 
 모든 셀 실행
 
